@@ -43,7 +43,7 @@ login_docker(){
         read -p "输入阿里云镜像服务用户名: " username
         read -p "输入阿里云镜像服务密码: " password
         read -p "输入阿里云镜像服务公网地址: " address
-        out=$(echo $password | sudo docker login --username=$username $address 2>&1)
+        out=$(echo $password | sudo -S docker login --username=$username --password-stdin $address 2>&1)
         if echo "$out" | grep -q "Login Succeeded"; then
             echo "登录成功!"
             sed -i "s|DOCKER_USERNAME|$username|g" ./config-auto/gz/appsettings.json
