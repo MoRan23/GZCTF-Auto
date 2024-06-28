@@ -7,7 +7,7 @@ start(){
     curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
     sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-get -y update
-    sudo apt-get -y --no-install-recommends install docker-ce
+    sudo apt-get -y --no-install-recommends install docker-ce docker-compose-plugin
     mkdir config-auto config-auto/agent config-auto/docker config-auto/gz config-auto/k3s config-auto/nginx/
     wget -O config-auto/agent/agent-temp.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/agent/agent-temp.sh
     wget -O config-auto/docker/daemon.json https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/docker/daemon.json
@@ -242,6 +242,8 @@ while true; do
                 sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
             else
                 echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
+                echo "请检查域名解析是否正确，或者手动修改配置文件"
+                select=2
             fi
             break
             ;;

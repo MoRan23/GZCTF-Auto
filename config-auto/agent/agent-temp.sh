@@ -11,8 +11,8 @@ login_docker(){
         username="USER_OP"
         password="PASSWORD_OP"
         address="ADDRESS_OP"
-        out=$(echo $password | sudo docker login --username=$username $address 2>&1)
-        if echo "$login_command_output" | grep -q "Login Succeeded"; then
+        out=$(echo $password | sudo -S docker login --username=$username --password-stdin $address 2>&1)
+        if echo "$out" | grep -q "Login Succeeded"; then
             echo "登录成功!"
             break
         else
@@ -51,7 +51,7 @@ mv daemon.json /etc/docker/
 sudo systemctl daemon-reload && sudo systemctl restart docker
 
 if [ "$login" -eq 1 ]; then
-  echo "变量 hostNum 的值为 0"
+    login_docker
 else
   echo "跳过登录..."
 fi
