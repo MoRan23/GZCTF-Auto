@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  gzctf:
+    image: registry.cn-shanghai.aliyuncs.com/gztime/gzctf:latest
+    restart: always
+    environment:
+      - "GZCTF_ADMIN_PASSWORD=ADMIN_PASSWD"
+      # choose your backend language `en_US` / `zh_CN` / `ja_JP`
+      - "LC_ALL=zh_CN.UTF-8"
+    ports:
+      - "81:8080"
+    volumes:
+      - "./data/files:/app/files"
+      - "./appsettings.json:/app/appsettings.json:ro"
+      # - "./kube-config.yaml:/app/kube-config.yaml:ro"
+      # - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      - db
+      - cache
+    #PROXY
+
+  cache:
+    image: redis:alpine
+    restart: always
+
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - "POSTGRES_PASSWORD=GzctfAuto233"
+    volumes:
+      - "./data/db:/var/lib/postgresql/data"
+
+#NETWORK
