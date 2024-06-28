@@ -37,9 +37,9 @@ login_docker(){
         out=$(echo $password | sudo docker login --username=$username $address 2>&1)
         if echo "$login_command_output" | grep -q "Login Succeeded"; then
             echo "登录成功!"
-            sed -i "s|DOCKER_USERNAME|$username|g" ./config/gz/appsettings.json
-            sed -i "s|DOCKER_PASSWORD|$password|g" ./config/gz/appsettings.json
-            sed -i "s|DOCKER_ADDRESS|$address|g" ./config/gz/appsettings.json
+            sed -i "s|DOCKER_USERNAME|$username|g" ./config-auto/gz/appsettings.json
+            sed -i "s|DOCKER_PASSWORD|$password|g" ./config-auto/gz/appsettings.json
+            sed -i "s|DOCKER_ADDRESS|$address|g" ./config-auto/gz/appsettings.json
             break
         else
             echo "登录失败，用户名或密码错误，请重新输入！"
@@ -53,11 +53,11 @@ set_smtp(){
     read -p "请输入smtp服务器用户名: " smtp_username
     read -p "请输入smtp服务器密码: " smtp_password
     read -p "请输入发件人邮箱: " smtp_sender
-    sed -i "s|SMTP_SERVER|$smtp_server|g" ./config/gz/appsettings.json
-    sed -i "s|SMTP_PORT|$smtp_port|g" ./config/gz/appsettings.json
-    sed -i "s|SMTP_USERNAME|$smtp_username|g" ./config/gz/appsettings.json
-    sed -i "s|SMTP_PASSWORD|$smtp_password|g" ./config/gz/appsettings.json
-    sed -i "s|SMTP_SENDER|$smtp_sender|g" ./config/gz/appsettings.json
+    sed -i "s|SMTP_SERVER|$smtp_server|g" ./config-auto/gz/appsettings.json
+    sed -i "s|SMTP_PORT|$smtp_port|g" ./config-auto/gz/appsettings.json
+    sed -i "s|SMTP_USERNAME|$smtp_username|g" ./config-auto/gz/appsettings.json
+    sed -i "s|SMTP_PASSWORD|$smtp_password|g" ./config-auto/gz/appsettings.json
+    sed -i "s|SMTP_SENDER|$smtp_sender|g" ./config-auto/gz/appsettings.json
 }
 
 
@@ -105,16 +105,16 @@ while true; do
     case $setup in
         1)
             echo "选择docker部署..."
-            sed -i "s|SETUPTYPE|Docker|g" ./config/gz/appsettings.json
-            sed -i "s|#K3S||g" ./config/gz/appsettings.json
-            sed -i "s|# - \"/var/run/docker.sock:/var/run/docker.sock\"|- \"/var/run/docker.sock:/var/run/docker.sock\"|g" ./config/gz/docker-compose.yaml
+            sed -i "s|SETUPTYPE|Docker|g" ./config-auto/gz/appsettings.json
+            sed -i "s|#K3S||g" ./config-auto/gz/appsettings.json
+            sed -i "s|# - \"/var/run/docker.sock:/var/run/docker.sock\"|- \"/var/run/docker.sock:/var/run/docker.sock\"|g" ./config-auto/gz/docker-compose.yaml
             break
             ;;
         2)
             echo "选择docker+k3s部署..."
-            sed -i "s|SETUPTYPE|Kubernetes|g" ./config/gz/appsettings.json
-            sed -i "s|#K3S|,\"KubernetesConfig\": {\"Namespace\": \"gzctf-challenges\",\"ConfigPath\": \"kube-config.yaml\",\"AllowCIDR\": [\"10.0.0.0/8\"],\"DNS\": [\"8.8.8.8\",\"223.5.5.5\"]}|g" ./config/gz/appsettings.json
-            sed -i "s|# - \"./kube-config.yaml:/app/kube-config.yaml:ro\"|- \"./kube-config.yaml:/app/kube-config.yaml:ro\"|g" ./config/gz/docker-compose.yaml
+            sed -i "s|SETUPTYPE|Kubernetes|g" ./config-auto/gz/appsettings.json
+            sed -i "s|#K3S|,\"KubernetesConfig\": {\"Namespace\": \"gzctf-challenges\",\"ConfigPath\": \"kube-config.yaml\",\"AllowCIDR\": [\"10.0.0.0/8\"],\"DNS\": [\"8.8.8.8\",\"223.5.5.5\"]}|g" ./config-auto/gz/appsettings.json
+            sed -i "s|# - \"./kube-config.yaml:/app/kube-config.yaml:ro\"|- \"./kube-config.yaml:/app/kube-config.yaml:ro\"|g" ./config-auto/gz/docker-compose.yaml
             read -p "请输入k3s节点机器数量（本机除外）： " hostNum
             case $hostNum in
                 *)
@@ -144,8 +144,8 @@ while true; do
                 source_add="https://docker.huhstsec.top"
             fi
             echo "使用的镜像源是: $source_add"
-            sed -i "s|\[\"[^\"]*\"\]|\[\"$source_add\"\]|g" ./config/docker/daemon.json
-            sed -i "s|https://docker.huhstsec.top|$source_add|g" ./config/agent/agent-temp.sh
+            sed -i "s|\[\"[^\"]*\"\]|\[\"$source_add\"\]|g" ./config-auto/docker/daemon.json
+            sed -i "s|https://docker.huhstsec.top|$source_add|g" ./config-auto/agent/agent-temp.sh
             break
             ;;
         2)
@@ -168,9 +168,9 @@ while true; do
     case $proxy in
         1)
             echo "选择开启流量代理..."
-            sed -i "s|Default|PlatformProxy|g" ./config/gz/appsettings.json
-            sed -i "s|#PROXY|networks:\n      - default\n      - challenges|g" ./config/gz/docker-compose.yaml
-            sed -i "s|#NETWORK|networks:\n  challenges:\n    external: true|g" ./config/gz/docker-compose.yaml
+            sed -i "s|Default|PlatformProxy|g" ./config-auto/gz/appsettings.json
+            sed -i "s|#PROXY|networks:\n      - default\n      - challenges|g" ./config-auto/gz/docker-compose.yaml
+            sed -i "s|#NETWORK|networks:\n  challenges:\n    external: true|g" ./config-auto/gz/docker-compose.yaml
             docker network create challenges -d bridge --subnet 10.2.0.0/16
             break
             ;;
@@ -213,21 +213,21 @@ domain_ip=$(dig +short "$domain")
 
 if [ "$public_ip" = "$domain_ip" ]; then
     echo "设置域名 $domain 成功..."
-    sed -i "s|DOMAIN|$domain|g" ./config/gz/appsettings.json
-    sed -i "s|PUBLIC_IP|$public_ip|g" ./config/gz/appsettings.json
-    sed -i "s|SERVER|$public_ip|g" ./config/agent/agent-temp.sh
+    sed -i "s|DOMAIN|$domain|g" ./config-auto/gz/appsettings.json
+    sed -i "s|PUBLIC_IP|$public_ip|g" ./config-auto/gz/appsettings.json
+    sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
 else
     echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
 fi
 
 read -p "请设置管理员密码: " adminpasswd
-sed -i "s|ADMIN_PASSWD|$adminpasswd|g" ./config/gz/docker-compose.yaml
+sed -i "s|ADMIN_PASSWD|$adminpasswd|g" ./config-auto/gz/docker-compose.yaml
 
 echo "开始部署..."
 
 systemctl disable --now ufw && systemctl disable --now iptables
-mv ./docker/daemon.json /etc/docker/
+mv ./config-auto/docker/daemon.json /etc/docker/
 sudo systemctl daemon-reload && sudo systemctl restart docker
 curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
 token=$(sudo cat /var/lib/rancher/k3s/server/token)
-sed -i "s|mynodetoken|$token|g" ./config/agent/agent-temp.sh
+sed -i "s|mynodetoken|$token|g" ./config-auto/agent/agent-temp.sh

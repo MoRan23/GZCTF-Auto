@@ -28,8 +28,9 @@ sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/li
 sudo apt-get -y update
 sudo apt-get -y --no-install-recommends install docker-ce
 
-
-sed -i "s|\[\"[^\"]*\"\]|\[\"$source_add\"\]|g" ./config/docker/daemon.json
-
+wget -O daemon.json https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/docker/daemon.json
+sed -i "s|\[\"[^\"]*\"\]|\[\"$source_add\"\]|g" daemon.json
+mv daemon.json /etc/docker/
+sudo systemctl daemon-reload && sudo systemctl restart docker
 
 curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
