@@ -302,6 +302,8 @@ else
     echo "未解析域名, 跳过nginx配置..."
 fi
 
+rm -rf config-auto
+
 cd GZCTF
 docker compose up -d
 
