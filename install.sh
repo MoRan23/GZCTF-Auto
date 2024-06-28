@@ -198,6 +198,7 @@ while true; do
             ;;
         2)
             echo "选择关闭smtp邮件服务.."
+            sed -i "s|SMTP_PORT|1|g" ./config-auto/gz/appsettings.json
             break
             ;;
         *)
