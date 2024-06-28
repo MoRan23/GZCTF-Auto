@@ -23,7 +23,8 @@ change_Source(){
     if [ -f /etc/os-release ]; then
     . /etc/os-release
     VERSION_ID=$(echo "$VERSION_ID" | tr -d '"')
-    IFS='.' read -r major minor <<< "$VERSION_ID"
+    major=$(echo "$VERSION_ID" | cut -d '.' -f 1)
+    minor=$(echo "$VERSION_ID" | cut -d '.' -f 2)
     if [ "$major" -lt 24 ] || { [ "$major" -eq 24 ] && [ "$minor" -lt 4 ]; }; then
         sudo sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
         echo "换源成功！"
