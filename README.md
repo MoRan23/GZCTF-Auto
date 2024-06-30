@@ -24,7 +24,7 @@ fix:修复可以设置弱密码导致无法登录的bug
 官网：https://www.dkdun.cn/  
 
 ctf专区群: 727077055  
-<img src="https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/moran/main/20240630210630.png" alt="DKDUN-CTF QQ群" width="150" height="150">
+<img src="https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/moran/main/20240630210630.png" alt="DKDUN-CTF QQ群" width="150" height="150">  
 公众号：DK盾
   
 dkdun 推出 ctfer 赞助计划  
