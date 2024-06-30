@@ -274,7 +274,7 @@ else
     curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
     token=$(sudo cat /var/lib/rancher/k3s/server/token)
     sed -i "s|mynodetoken|$token|g" ./config-auto/agent/agent-temp.sh
-    echo -e "'--disable=traefik' \\n    '--kube-apiserver-arg=service-node-port-range=20000-50000' \\n    '--kubelet-arg=config=/etc/rancher/k3s/kubelet.config' \\n" >> /etc/systemd/system/k3s.service
+    echo -e "    '--disable=traefik' \\\\\\n    '--kube-apiserver-arg=service-node-port-range=20000-50000' \\\\\\n    '--kubelet-arg=config=/etc/rancher/k3s/kubelet.config' \\\\\\n" >> /etc/systemd/system/k3s.service
     mv ./config-auto/k3s/kubelet.config /etc/rancher/k3s/
     mv ./config-auto/k3s/registries.yaml /etc/rancher/k3s/
     sudo systemctl daemon-reload && sudo systemctl restart k3s
