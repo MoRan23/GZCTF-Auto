@@ -1,4 +1,4 @@
 mirrors:
   "docker.io":
     endpoint:
-      - "https://docker.huhstsec.top"
+      - "https://hub.hk1.dkdun.com/"
