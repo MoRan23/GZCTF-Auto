@@ -13,6 +13,7 @@ wget -O install.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/Mo
 ### DKDUN
 官网：https://www.dkdun.cn/  
 ctf专区群: 727077055  
+公众号：DK盾
   
 dkdun 推出 ctfer 赞助计划  
 为各位热爱 ctf 的师傅提供优惠服务器  
