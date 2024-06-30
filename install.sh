@@ -311,17 +311,19 @@ docker compose up -d
 
 echo "部署成功！"
 
+echo "======================================================================"
+
 if [ "$setup" -eq 2 ]; then
-    echo "======================================================================"
     echo "请将 k3s-agent 文件夹中的脚本拷贝到相应的其他节点机器上，并执行 agent-*.sh"
     echo "如有新加机器, 可以修改 agent.sh 中 hostname 行的 NAME 变量后再执行"
-    echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
-    if [ "$select" -eq 1 ]; then
-        echo "请访问 https://$domain 进行后续配置"
-    else
-        echo "请访问 http://$public_ip:81 进行后续配置"
-    fi
-    echo "用户名: admin"
-    echo "密码: $adminpasswd"
-    echo "======================================================================"
 fi
+
+echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
+if [ "$select" -eq 1 ]; then
+    echo "请访问 https://$domain 进行后续配置"
+else
+    echo "请访问 http://$public_ip:81 进行后续配置"
+fi
+echo "用户名: admin"
+echo "密码: $adminpasswd"
+echo "======================================================================"

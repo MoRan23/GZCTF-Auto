@@ -53,7 +53,7 @@ sudo systemctl daemon-reload && sudo systemctl restart docker
 if [ "$login" -eq 1 ]; then
     login_docker
 else
-  echo "跳过登录..."
+    echo "跳过登录..."
 fi
 
 curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
@@ -64,4 +64,4 @@ sed -i "s|https://docker.huhstsec.top|$source_add|g" registries.yaml
 mv registries.yaml /etc/rancher/k3s/
 sudo systemctl daemon-reload && sudo systemctl restart k3s
 
-echo "部署成功！"
+echo "k3s节点连接成功！"
