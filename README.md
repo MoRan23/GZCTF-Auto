@@ -8,7 +8,12 @@ GZCTF 一键部署
 使用方式：  
 ```
 wget -O install.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/install.sh && chmod +x install.sh && ./install.sh
-```  
+```
+## 更新计划
+|功能|状态|
+|--|--|
+|修改logo|新建文件夹...|
+|qq机器人|暂无排期...|
 ## 赞助鸣谢
 ### DKDUN
 官网：https://www.dkdun.cn/  
