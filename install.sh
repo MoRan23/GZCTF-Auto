@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 start(){
     sudo apt-get -y update
@@ -300,7 +300,7 @@ if [ "$select" -eq 1 ]; then
     ./acme.sh --install -m my@example.com
     cd ../
 
-    . ~/.bashrc
+    source ~/.bashrc
     acme.sh --issue -d $domain --standalone
     acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
     systemctl start nginx
