@@ -1,11 +1,11 @@
 #!/bin/sh
 
 start(){
-    sudo apt-get update
+    sudo apt-get -y update
     sudo apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     sudo apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils nginx
     curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+    sudo add-apt-repository -y "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-get -y update
     sudo apt-get -y --no-install-recommends install docker-ce docker-compose-plugin
     mkdir config-auto config-auto/agent config-auto/docker config-auto/gz config-auto/k3s config-auto/nginx/
