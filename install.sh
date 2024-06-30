@@ -127,12 +127,17 @@ while true; do
             sed -i "s|SETUPTYPE|Kubernetes|g" ./config-auto/gz/appsettings.json
             sed -i "s|#K3S|,\"KubernetesConfig\": {\"Namespace\": \"gzctf-challenges\",\"ConfigPath\": \"kube-config.yaml\",\"AllowCIDR\": [\"10.0.0.0/8\"],\"DNS\": [\"8.8.8.8\",\"223.5.5.5\"]}|g" ./config-auto/gz/appsettings.json
             sed -i "s|# - \"./kube-config.yaml:/app/kube-config.yaml:ro\"|- \"./kube-config.yaml:/app/kube-config.yaml:ro\"|g" ./config-auto/gz/docker-compose.yaml
-            read -p "请输入k3s节点机器数量（本机除外）： " hostNum
-            case $hostNum in
-                *)
+            while true; do
+                read -p "请输入k3s节点机器数量（本机除外）： " hostNum
+                if [ -z "$hostNum" ]; then
+                    echo "输入为空，请重新输入。"
+                elif ! echo "$hostNum" | grep -qE '^[0-9]+$'; then
+                    echo "输入不是数字，请重新输入。"
+                else
                     echo "设置 $hostNum 个节点..."
-                    ;;
-            esac
+                    break
+                fi
+            done
             break
             ;;
         *)
