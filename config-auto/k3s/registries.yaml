@@ -1,4 +1,4 @@
 mirrors:
   "docker.io":
     endpoint:
-      "https://docker.huhstsec.top"
+      - "https://docker.huhstsec.top"
