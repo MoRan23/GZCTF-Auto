@@ -301,8 +301,8 @@ if [ "$select" -eq 1 ]; then
     cd ../
 
     source ~/.bashrc
-    acme.sh --issue -d $domain --standalone
-    acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
+    ./.acme.sh/acme.sh --issue -d $domain --standalone
+    ./.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
     systemctl start nginx
 else
     echo "未解析域名, 跳过nginx配置..."
