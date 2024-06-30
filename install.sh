@@ -3,7 +3,7 @@
 start(){
     sudo apt-get -y update
     sudo apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-    sudo apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils nginx
+    sudo apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils socat nginx
     curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
     sudo add-apt-repository -y "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-get -y update
@@ -294,11 +294,13 @@ fi
 if [ "$select" -eq 1 ]; then
     mv ./config-auto/nginx/nginx.conf /etc/nginx/
     systemctl stop nginx
-
-    git clone https://gitee.com/neilpang/acme.sh.git
-    sh ./acme.sh/acme.sh --install -m my@example.com
     
-    source ~/.basrc
+    git clone https://gitee.com/neilpang/acme.sh.git
+    cd acme.sh
+    ./acme.sh --install -m my@example.com
+    cd ../
+
+    source ~/.bashrc
     acme.sh --issue -d $domain --standalone
     acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
     systemctl start nginx
