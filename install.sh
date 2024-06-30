@@ -300,7 +300,7 @@ if [ "$select" -eq 1 ]; then
     ./acme.sh --install -m my@example.com
     cd ../
 
-    source ~/.bashrc
+    . ~/.bashrc
     acme.sh --issue -d $domain --standalone
     acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
     systemctl start nginx
