@@ -295,7 +295,9 @@ if [ "$select" -eq 1 ]; then
     mv ./config-auto/nginx/nginx.conf /etc/nginx/
     systemctl stop nginx
 
-    curl https://get.acme.sh | sh -s email=my@mail.com
+    git clone https://gitee.com/neilpang/acme.sh.git
+    sh ./acme.sh/acme.sh --install -m my@example.com
+    
     source ~/.basrc
     acme.sh --issue -d $domain --standalone
     acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
@@ -321,6 +323,7 @@ fi
 echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
 if [ "$select" -eq 1 ]; then
     echo "请访问 https://$domain 进行后续配置"
+    echo "或者访问 http://$public_ip:81 进行后续配置"
 else
     echo "请访问 http://$public_ip:81 进行后续配置"
 fi
