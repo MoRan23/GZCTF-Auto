@@ -20,8 +20,10 @@ wget -O install.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/Mo
 fix:修复可以设置弱密码导致无法登录的bug  
 ## 赞助鸣谢
 ### DKDUN
+![DKDUN 图标](https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/moran/main/QQ%E5%9B%BE%E7%89%8720240630210148.png) 
 官网：https://www.dkdun.cn/  
 ctf专区群: 727077055  
+![DKDUN-CTF QQ群](https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/moran/main/qrcode_1719752406171.jpg)  
 公众号：DK盾
   
 dkdun 推出 ctfer 赞助计划  
