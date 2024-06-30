@@ -3,6 +3,7 @@
 ## 项目介绍&使用方法
 GZCTF 一键部署  
 现已支持单 `docker` 以及 `docker+k3s` 部署  
+支持自动申请证书并反代，`docker+k3s`模式会生成节点机的一键脚本  
 更多功能持续更新......  
 测试环境：ubuntu 22.04  
 使用方式：  
@@ -18,6 +19,7 @@ wget -O install.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/Mo
 ## 更新历史
 ### 2024.6.30
 fix:修复可以设置弱密码导致无法登录的bug  
+issue:发布首发版本  
 ## 赞助鸣谢
 ### DKDUN
 <img src="https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/moran/main/QQ%E5%9B%BE%E7%89%8720240630210148.png" alt="DKDUN 图标" width="150" height="150">
