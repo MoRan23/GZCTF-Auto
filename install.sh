@@ -262,8 +262,16 @@ while true; do
     esac
 done
 
-read -p "请设置管理员密码: " adminpasswd
-sed -i "s|ADMIN_PASSWD|$adminpasswd|g" ./config-auto/gz/docker-compose.yaml
+while true; do
+    read -p "请设置管理员密码(必须包含大写字母、小写字母和数字): " adminpasswd
+    if [[ $adminpasswd =~ [A-Z] && $adminpasswd =~ [a-z] && $adminpasswd =~ [0-9] ]]; then
+        sed -i "s|ADMIN_PASSWD|$adminpasswd|g" ./config-auto/gz/docker-compose.yaml
+        echo "密码设置成功！"
+        break
+    else
+        echo "密码必须包含大写字母、小写字母和数字，请重新输入。"
+    fi
+done
 
 echo "开始部署..."
 
