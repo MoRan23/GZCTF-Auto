@@ -54,5 +54,6 @@ sed -i "s|#AGENT_HOSTS|echo \"$ip_address $hostname\" >> /etc/hosts\n#AGENT_HOST
 cp agent-temp $hostname.sh
 
 sed -i "s|NAME|$hostname|g" $hostname.sh
+sed -i "s|PUBLIC_IP|$ip_address|g" $hostname.sh
 
 echo "连接脚本生成完成！ $hostname.sh"
