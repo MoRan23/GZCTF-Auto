@@ -1,6 +1,9 @@
 #!/bin/bash
 
 start(){
+    hostnamectl set-hostname k3s-master
+    ip=$(curl -s https://api.ipify.org)
+    echo "$ip k3s-master" >> /etc/hosts
     sudo apt-get -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils socat nginx
@@ -16,6 +19,7 @@ start(){
     wget -O config-auto/k3s/kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
     wget -O config-auto/k3s/registries.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/registries.yaml
     wget -O config-auto/nginx/nginx.conf https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/nginx/nginx.conf
+    sed -i "s|MASTER_IP|$ip|g" config-auto/agent/agent-temp.sh
 }
 
 change_Source(){
@@ -135,6 +139,38 @@ while true; do
                     echo "输入不是数字，请重新输入。"
                 else
                     echo "设置 $hostNum 个节点..."
+                    ip_array=()
+                    for i in $(seq 1 $hostNum); do
+                        while true; do
+                            read -p "请输入k3s节点 $i 的ip地址（将会影响自动连接脚本）： " hostIP
+                            echo "请确认k3s节点1的ip地址（必须无错误，否则会出现连接不上的情况）：$hostIP "
+                            echo "1) 确认"
+                            echo "2) 重新输入"
+                            read -p "是否确认？: " confirm
+                            case $confirm in
+                                1)
+                                    echo "确认节点 $i 的ip地址：$hostIP"
+                                    ip_array+=($hostIP)
+                                    break
+                                    ;;
+                                2)
+                                    ;;
+                                *)
+                                    echo "无效的选择！"
+                                    ;;
+                            esac
+                        done
+                        sed -i "s|#AGENT_HOSTS|echo \"$hostIP k3s-agent-$i\" >> /etc/hosts\n#AGENT_HOSTS|g" config-auto/agent/agent-temp.sh
+                        echo "$hostIP k3s-agent-$i" >> /etc/hosts
+                    done
+                    IP_ADDR=$(hostname -I | awk '{print $1}')
+                    if [[ $IP_ADDR =~ ^10\. ]] || [[ $IP_ADDR =~ ^192\.168\. ]] || [[ $IP_ADDR =~ ^172\.1[6-9]\. ]] || [[ $IP_ADDR =~ ^172\.2[0-9]\. ]] || [[ $IP_ADDR =~ ^172\.3[0-1]\. ]]; then
+                        echo "主机在VPC网络中..."
+                        VPC=1
+                    else
+                        echo "主机在经典网络中..."
+                        VPC=0
+                    fi
                     break
                 fi
             done
@@ -285,7 +321,12 @@ if [ "$setup" -eq 1 ]; then
     mv ./config-auto/gz/appsettings.json ./GZCTF/
     mv ./config-auto/gz/docker-compose.yaml ./GZCTF/
 else
-    curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
+    if [ "$VPC" -eq 1 ]; then
+        curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --node-external-ip="$public_ip" --flannel-backend=wireguard-native --flannel-external-ip
+        sed -i "s|sh -|sh -s - --node-external-ip=PUBLIC_IP|g" config-auto/agent/agent-temp.sh
+    else
+        curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
+    fi
     token=$(sudo cat /var/lib/rancher/k3s/server/token)
     sed -i "s|mynodetoken|$token|g" ./config-auto/agent/agent-temp.sh
     sed -i '${/^$/d}' /etc/systemd/system/k3s.service
@@ -299,10 +340,12 @@ else
     mv ./config-auto/gz/appsettings.json ./GZCTF/
     mv ./config-auto/gz/docker-compose.yaml ./GZCTF/
     mkdir k3s-agent
-    cp ./config-auto/agent/agent-temp.sh k3s-agent/agent.sh
+    cp ./config-auto/agent/agent-temp.sh k3s-agent/agent-temp
+    mv ./config-auto/agent/add-agent.sh k3s-agent/add-agent.sh
     for i in $(seq 1 $hostNum); do
-        cp ./config-auto/agent/agent-temp.sh k3s-agent/agent-$i.sh
-        sed -i "s|NAME|agent-$i|g" k3s-agent/agent-$i.sh
+        cp ./config-auto/agent/agent-temp.sh k3s-agent/k3s-agent-$i.sh
+        sed -i "s|NAME|k3s-agent-$i|g" k3s-agent/k3s-agent-$i.sh
+        sed -i "s|PUBLIC_IP|${ip_array[$i-1]}|g" k3s-agent/k3s-agent-$i.sh
     done
 fi
 
@@ -328,16 +371,25 @@ rm -rf config-auto
 cd GZCTF
 docker compose up -d
 
-echo "部署成功！"
+echo "============"
+echo "||部署成功!||"
+echo "============"
 
-echo "======================================================================"
+echo "==============================================================================================================="
 
 if [ "$setup" -eq 2 ]; then
-    echo "请将 k3s-agent 文件夹中的脚本拷贝到相应的其他节点机器上，并执行 agent-*.sh"
-    echo "如有新加机器, 可以修改 agent.sh 中 hostname 行的 NAME 变量后再执行"
+    echo "---------------------------------------------------------------------------------------------------------------"
+    echo "请将 k3s-agent 文件夹中的脚本拷贝到相应的其他节点机器上，并执行 k3s-agent-*.sh"
+    echo "如有新加机器, 请使用 k3s-agent 文件夹中的 add-agent.sh 脚本添加, 并且请手动添加 <ip> <hostname> 到本机 /etc/hosts 中"
+    echo "使用方法: bash add-agent.sh <ip> <hostname>"
+    echo "其中 ip 为新加机器的ip地址,  hostname 为新加机器的主机名, 都是必填项"
+    echo "主机名必须符合标准：长度在1到255之间，只能包含字母、数字、连字符。且不能与已有主机名重复！！！"
+    echo "例如: bash add-agent.sh 10.10.10.10 k3s-agent-example"
+    echo "---------------------------------------------------------------------------------------------------------------"
 fi
 
 echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
+
 if [ "$select" -eq 1 ]; then
     echo "请访问 https://$domain 进行后续配置"
     echo "或者访问 http://$public_ip:81 进行后续配置"
@@ -346,4 +398,4 @@ else
 fi
 echo "用户名: admin"
 echo "密码: $adminpasswd"
-echo "======================================================================"
+echo "==============================================================================================================="

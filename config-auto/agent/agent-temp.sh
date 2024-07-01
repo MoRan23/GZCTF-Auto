@@ -1,6 +1,8 @@
 #!/bin/bash
 
-hostname NAME
+hostnamectl set-hostname NAME
+echo "MASTER_IP k3s-master" >> /etc/hosts
+#AGENT_HOSTS
 
 source_add="https://hub.hk1.dkdun.com/"
 
@@ -37,6 +39,7 @@ else
     echo "换源失败，请手动换源！"
 fi
 
+systemctl disable --now ufw && systemctl disable --now iptables
 sudo apt-get -y update
 sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common
