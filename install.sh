@@ -188,13 +188,14 @@ while true; do
         1)
             echo "选择开启流量代理..."
             sed -i "s|Default|PlatformProxy|g" ./config-auto/gz/appsettings.json
-            sed -i "s|#PROXY|networks:\n      - default\n      - challenges|g" ./config-auto/gz/docker-compose.yaml
-            sed -i "s|#NETWORK|networks:\n  challenges:\n    external: true|g" ./config-auto/gz/docker-compose.yaml
+            sed -i "s|\"EnableTrafficCapture\": false,|\"EnableTrafficCapture\": true,|g" ./config-auto/gz/appsettings.json
+            sed -i "s|proxy_set_header REMOTE-HOST \$remote_addr;|proxy_set_header REMOTE-HOST \$remote_addr;\n    proxy_set_header Upgrade \$http_upgrade;\n    proxy_set_header Connection \$connection_upgrade;\n|g" ./config-auto/nginx/nginx.conf
+            sed -i "s|include /etc/nginx/sites-enabled/*;|include /etc/nginx/sites-enabled/*;\n\n  map \$http_upgrade \$connection_upgrade {\n      default upgrade;\n      ''      close;\n  }\n|g" ./config-auto/nginx/nginx.conf
             docker network create challenges -d bridge --subnet 10.2.0.0/16
             break
             ;;
         2)
-            echo "选择关闭流量代理.."
+            echo "选择关闭流量代理..."
             break
             ;;
         *)

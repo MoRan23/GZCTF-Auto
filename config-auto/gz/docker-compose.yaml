@@ -17,7 +17,6 @@ services:
     depends_on:
       - db
       - cache
-    #PROXY
 
   cache:
     image: redis:alpine
@@ -30,5 +29,3 @@ services:
       - "POSTGRES_PASSWORD=GzctfAuto233"
     volumes:
       - "./data/db:/var/lib/postgresql/data"
-
-#NETWORK

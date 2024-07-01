@@ -63,7 +63,7 @@ mv kubelet.config /etc/rancher/k3s/
 wget -O registries.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/registries.yaml
 sed -i "s|https://docker.huhstsec.top|$source_add|g" registries.yaml
 mv registries.yaml /etc/rancher/k3s/
-sed -i '${/^$/d}' /etc/systemd/system/k3s.service
+sed -i '${/^$/d}' /etc/systemd/system/k3s-agent.service
 echo -e "        '--kubelet-arg=config=/etc/rancher/k3s/kubelet.config' \\\\\\n" >> /etc/systemd/system/k3s-agent.service
 sudo systemctl daemon-reload && sudo systemctl restart k3s-agent
 
