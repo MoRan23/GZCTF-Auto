@@ -39,7 +39,6 @@ else
     echo "换源失败，请手动换源！"
 fi
 
-systemctl disable --now ufw && systemctl disable --now iptables
 sudo apt-get -y update
 sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common
@@ -47,6 +46,7 @@ curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key a
 sudo add-apt-repository -y "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get -y update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install docker-ce
+systemctl disable --now ufw && systemctl disable --now iptables
 
 wget -O daemon.json https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/docker/daemon.json
 sed -i "s|\[\"[^\"]*\"\]|\[\"$source_add\"\]|g" daemon.json
