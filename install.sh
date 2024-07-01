@@ -6,19 +6,21 @@ start(){
     echo "$ip k3s-master" >> /etc/hosts
     sudo apt-get -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils socat nginx
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils socat debian-keyring debian-archive-keyring
     curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
     sudo add-apt-repository -y "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-get -y update
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install docker-ce docker-compose-plugin
-    mkdir config-auto config-auto/agent config-auto/docker config-auto/gz config-auto/k3s config-auto/nginx/
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install docker-ce docker-compose-plugin caddy
+    mkdir config-auto config-auto/agent config-auto/docker config-auto/gz config-auto/k3s config-auto/caddy
     wget -O config-auto/agent/agent-temp.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/agent/agent-temp.sh
     wget -O config-auto/docker/daemon.json https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/docker/daemon.json
     wget -O config-auto/gz/appsettings.json https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/gz/appsettings.json
     wget -O config-auto/gz/docker-compose.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/gz/docker-compose.yaml
     wget -O config-auto/k3s/kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
     wget -O config-auto/k3s/registries.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/registries.yaml
-    wget -O config-auto/nginx/nginx.conf https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/nginx/nginx.conf
+    wget -O config-auto/caddy/Caddyfile https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/caddy/Caddyfile
     sed -i "s|MASTER_IP|$ip|g" config-auto/agent/agent-temp.sh
 }
 
@@ -225,9 +227,9 @@ while true; do
             echo "选择开启流量代理..."
             sed -i "s|Default|PlatformProxy|g" ./config-auto/gz/appsettings.json
             sed -i "s|\"EnableTrafficCapture\": false,|\"EnableTrafficCapture\": true,|g" ./config-auto/gz/appsettings.json
-            sed -i "s|proxy_set_header REMOTE-HOST \$remote_addr;|proxy_set_header REMOTE-HOST \$remote_addr;\n    proxy_set_header Upgrade \$http_upgrade;\n    proxy_set_header Connection \$connection_upgrade;\n|g" ./config-auto/nginx/nginx.conf
-            sed -i "s|# server_name_in_redirect off;|# server_name_in_redirect off;\n\n  map \$http_upgrade \$connection_upgrade {\n      default upgrade;\n      ''      close;\n  }\n|g" ./config-auto/nginx/nginx.conf
-            docker network create challenges -d bridge --subnet 10.2.0.0/16
+            if [ "$setup" -eq 1 ]; then
+                docker network create challenges -d bridge --subnet 10.2.0.0/16
+            fi
             break
             ;;
         2)
@@ -279,8 +281,7 @@ while true; do
             if [ "$public_ip" = "$domain_ip" ]; then
                 echo "设置域名 $domain 成功..."
                 sed -i "s|DOMAIN|$domain|g" ./config-auto/gz/appsettings.json
-                sed -i "s|DOMAIN|$domain|g" ./config-auto/nginx/nginx.conf
-                sed -i "s|PUBLIC_IP|$public_ip|g" ./config-auto/gz/appsettings.json
+                sed -i "s|DOMAIN|$domain|g" ./config-auto/caddy/Caddyfile
                 sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
             else
                 echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
@@ -350,20 +351,15 @@ else
 fi
 
 if [ "$select" -eq 1 ]; then
-    mv ./config-auto/nginx/nginx.conf /etc/nginx/
-    systemctl stop nginx
+    mkdir caddy
+    mv ./config-auto/caddy/Caddyfile ./caddy/
+    sudo kill -9 $(sudo lsof -t -i:80)
     
-    git clone https://gitee.com/neilpang/acme.sh.git
-    cd acme.sh
-    ./acme.sh --install -m my@example.com
+    cd caddy
+    nohup caddy run > caddy.log 2>&1 &
     cd ../
-
-    source ~/.bashrc
-    ./.acme.sh/acme.sh --issue -d $domain --standalone
-    ./.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/nginx/cert.pem --keypath /etc/nginx/key.pem
-    systemctl start nginx
 else
-    echo "未解析域名, 跳过nginx配置..."
+    echo "未解析域名, 跳过caddy配置..."
 fi
 
 rm -rf config-auto
@@ -389,6 +385,7 @@ if [ "$setup" -eq 2 ]; then
 fi
 
 echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
+echo "Caddy 相关文件已经保存在当前目录下的 caddy 文件夹中"
 
 if [ "$select" -eq 1 ]; then
     echo "请访问 https://$domain 进行后续配置"

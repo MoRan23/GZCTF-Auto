@@ -38,3 +38,4 @@ issue:发布首发版本
 fix:修复平台代理功能开启无法访问的问题  
 fix:修复k3s连接脚本在VPC网络中无法连接master节点问题  
 update:更新临时新加机器时的连接脚本生成脚本  
+update:弃用nginx反代，使用caddy反代  
