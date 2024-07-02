@@ -2,8 +2,6 @@
 
 start(){
     hostnamectl set-hostname k3s-master
-    ip=$(curl -s https://api.ipify.org)
-    echo "$ip k3s-master" >> /etc/hosts
     sudo apt-get -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils debian-keyring debian-archive-keyring
@@ -21,7 +19,6 @@ start(){
     wget -O config-auto/k3s/kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
     wget -O config-auto/k3s/registries.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/registries.yaml
     wget -O config-auto/caddy/Caddyfile https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/caddy/Caddyfile
-    sed -i "s|MASTER_IP|$ip|g" config-auto/agent/agent-temp.sh
 }
 
 change_Source(){
@@ -167,10 +164,10 @@ while true; do
                     done
                     IP_ADDR=$(hostname -I | awk '{print $1}')
                     if [[ $IP_ADDR =~ ^10\. ]] || [[ $IP_ADDR =~ ^192\.168\. ]] || [[ $IP_ADDR =~ ^172\.1[6-9]\. ]] || [[ $IP_ADDR =~ ^172\.2[0-9]\. ]] || [[ $IP_ADDR =~ ^172\.3[0-1]\. ]]; then
-                        echo "主机在VPC网络中..."
+                        echo "主机在 VPC/内网 网络中..."
                         VPC=1
                     else
-                        echo "主机在经典网络中..."
+                        echo "主机在 经典 网络中..."
                         VPC=0
                     fi
                     break
@@ -180,6 +177,29 @@ while true; do
             ;;
         *)
             echo "无效的选择，请重新输入："
+            ;;
+    esac
+done
+
+echo "请选择部署网络环境："
+echo "1) 内网"
+echo "2) 公网"
+while true; do
+    read -p "请输入您的选择: " net
+
+    case $net in
+        1)
+            echo "选择内网部署..."
+            private_ip=$(hostname -I | awk '{print $1}')
+            sed -i "s|DOMAIN|$private_ip|g" ./config-auto/gz/appsettings.json
+            break
+            ;;
+        2)
+            echo "选择公网部署..."
+            break
+            ;;
+        *)
+            echo "无效的选择，请重新输入！"
             ;;
     esac
 done
@@ -265,40 +285,43 @@ while true; do
     esac
 done
 
-echo "请选择是否解析了域名："
-echo "1) 是"
-echo "2) 否"
-while true; do
-    read -p "请输入您的选择: " select
-    case $select in
-        1)
-            read -p "请输入解析的域名: " domain
-    
-            public_ip=$(curl -s https://api.ipify.org)
+if [ "$net" -eq 2 ]; then
+    echo "请选择是否解析了域名："
+    echo "1) 是"
+    echo "2) 否"
+    while true; do
+        read -p "请输入您的选择: " select
+        case $select in
+            1)
+                read -p "请输入解析的域名: " domain
+        
+                public_ip=$(curl -s https://api.ipify.org)
 
-            domain_ip=$(dig +short "$domain")
+                domain_ip=$(dig +short "$domain")
 
-            if [ "$public_ip" = "$domain_ip" ]; then
-                echo "设置域名 $domain 成功..."
-                sed -i "s|DOMAIN|$domain|g" ./config-auto/gz/appsettings.json
-                sed -i "s|DOMAIN|$domain|g" ./config-auto/caddy/Caddyfile
-                sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
-            else
-                echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
-                echo "请检查域名解析是否正确，或者手动修改配置文件"
-                select=2
-            fi
-            break
-            ;;
-        2)
-            echo "未解析域名..."
-            break
-            ;;
-        *)
-            echo "无效的选择，请重新输入："
-            ;;
-    esac
-done
+                if [ "$public_ip" = "$domain_ip" ]; then
+                    echo "设置域名 $domain 成功..."
+                    sed -i "s|DOMAIN|$domain|g" ./config-auto/gz/appsettings.json
+                    sed -i "s|DOMAIN|$domain|g" ./config-auto/caddy/Caddyfile
+                    sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
+                else
+                    echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
+                    echo "请检查域名解析是否正确，或者手动修改配置文件"
+                    select=2
+                fi
+                break
+                ;;
+            2)
+                echo "未解析域名..."
+                sed -i "s|DOMAIN|$public_ip|g" ./config-auto/gz/appsettings.json
+                break
+                ;;
+            *)
+                echo "无效的选择，请重新输入："
+                ;;
+        esac
+    done
+fi
 
 while true; do
     read -p "请设置管理员密码(必须包含大写字母、小写字母和数字): " adminpasswd
@@ -322,9 +345,13 @@ if [ "$setup" -eq 1 ]; then
     mv ./config-auto/gz/appsettings.json ./GZCTF/
     mv ./config-auto/gz/docker-compose.yaml ./GZCTF/
 else
-    if [ "$VPC" -eq 1 ]; then
-        curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --node-external-ip="$public_ip" --flannel-backend=wireguard-native --flannel-external-ip
-        sed -i "s|sh -|sh -s - --node-external-ip=PUBLIC_IP|g" config-auto/agent/agent-temp.sh
+    if [ "$net" -eq 2 ]; then
+        if [ "$VPC" -eq 1 ]; then
+            curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --node-external-ip="$public_ip" --flannel-backend=wireguard-native --flannel-external-ip
+            sed -i "s|sh -|sh -s - --node-external-ip=PUBLIC_IP|g" config-auto/agent/agent-temp.sh
+        else
+            curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
+        fi
     else
         curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
     fi
@@ -337,7 +364,15 @@ else
     sudo systemctl daemon-reload && sudo systemctl restart k3s
     mkdir GZCTF
     sudo cat /etc/rancher/k3s/k3s.yaml > ./GZCTF/kube-config.yaml
-    sed -i "s|127.0.0.1|$public_ip|g" ./GZCTF/kube-config.yaml
+    if [ "$net" -eq 2 ]; then
+        sed -i "s|127.0.0.1|$public_ip|g" ./GZCTF/kube-config.yaml
+        echo "$public_ip k3s-master" >> /etc/hosts
+        sed -i "s|MASTER_IP|$public_ip|g" config-auto/agent/agent-temp.sh
+    else
+        sed -i "s|127.0.0.1|$private_ip|g" ./GZCTF/kube-config.yaml
+        echo "$private_ip k3s-master" >> /etc/hosts
+        sed -i "s|MASTER_IP|$private_ip|g" config-auto/agent/agent-temp.sh
+    fi
     mv ./config-auto/gz/appsettings.json ./GZCTF/
     mv ./config-auto/gz/docker-compose.yaml ./GZCTF/
     mkdir k3s-agent
@@ -391,7 +426,11 @@ if [ "$select" -eq 1 ]; then
     echo "请访问 https://$domain 进行后续配置"
     echo "或者访问 http://$public_ip:81 进行后续配置"
 else
-    echo "请访问 http://$public_ip:81 进行后续配置"
+    if [ "$net" -eq 2 ]; then
+        echo "请访问 http://$public_ip:81 进行后续配置"
+    else
+        echo "请访问 http://$private_ip:81 进行后续配置"
+    fi
 fi
 echo "用户名: admin"
 echo "密码: $adminpasswd"
