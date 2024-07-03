@@ -8,7 +8,7 @@ services:
       # choose your backend language `en_US` / `zh_CN` / `ja_JP`
       - "LC_ALL=zh_CN.UTF-8"
     ports:
-      - "81:8080"
+      - "PORT:8080"
     volumes:
       - "./data/files:/app/files"
       - "./appsettings.json:/app/appsettings.json:ro"

@@ -19,6 +19,7 @@ start(){
     wget -O config-auto/k3s/kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
     wget -O config-auto/k3s/registries.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/registries.yaml
     wget -O config-auto/caddy/Caddyfile https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/caddy/Caddyfile
+    public_ip=$(curl -s https://api.ipify.org)
 }
 
 change_Source(){
@@ -73,6 +74,31 @@ set_smtp(){
     sed -i "s|SMTP_USERNAME|$smtp_username|g" ./config-auto/gz/appsettings.json
     sed -i "s|SMTP_PASSWORD|$smtp_password|g" ./config-auto/gz/appsettings.json
     sed -i "s|SMTP_SENDER|$smtp_sender|g" ./config-auto/gz/appsettings.json
+}
+
+set_port(){
+    while true; do
+        read -p "请设置GZCTF的端口（默认为80）: " gz_port
+        if [ -z "$gz_port" ]; then
+            gz_port=80
+        fi
+        case $gz_port in
+            ''|*[!0-9]*) echo "端口号必须为数字，请重新输入！" ;;
+            *) 
+                if [ "$gz_port" -lt 1 ] || [ "$gz_port" -gt 65535 ]; then
+                    echo "端口号必须在 1-65535 之间，请重新输入！"
+                else
+                    netstat -tuln | grep ":$gz_port\b" > /dev/null
+                    if [ $? -eq 0 ]; then
+                        echo "端口 $gz_port 已被占用, 请重新输入！"
+                    else
+                        sed -i "s|PORT|$gz_port|g" ./config-auto/gz/docker-compose.yaml
+                        break
+                    fi
+                fi
+                ;;
+        esac
+    done
 }
 
 
@@ -286,16 +312,14 @@ while true; do
 done
 
 if [ "$net" -eq 2 ]; then
-    echo "请选择是否解析了域名："
-    echo "1) 是"
-    echo "2) 否"
     while true; do
+        echo "请选择是否解析了域名："
+        echo "1) 是"
+        echo "2) 否"
         read -p "请输入您的选择: " select
         case $select in
             1)
                 read -p "请输入解析的域名: " domain
-        
-                public_ip=$(curl -s https://api.ipify.org)
 
                 domain_ip=$(dig +short "$domain")
 
@@ -304,16 +328,18 @@ if [ "$net" -eq 2 ]; then
                     sed -i "s|DOMAIN|$domain|g" ./config-auto/gz/appsettings.json
                     sed -i "s|DOMAIN|$domain|g" ./config-auto/caddy/Caddyfile
                     sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
+                    sed -i "s|PORT|81|g" ./config-auto/caddy/Caddyfile
+                    break
                 else
                     echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
-                    echo "请检查域名解析是否正确，或者手动修改配置文件"
+                    echo "请检查域名解析是否正确!"
                     select=2
                 fi
-                break
                 ;;
             2)
                 echo "未解析域名..."
                 sed -i "s|DOMAIN|$public_ip|g" ./config-auto/gz/appsettings.json
+                set_port
                 break
                 ;;
             *)
@@ -321,6 +347,10 @@ if [ "$net" -eq 2 ]; then
                 ;;
         esac
     done
+fi
+
+if [ "$net" -eq 1 ]; then
+    sei_port
 fi
 
 while true; do

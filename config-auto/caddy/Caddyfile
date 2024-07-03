@@ -1,4 +1,4 @@
 DOMAIN
-reverse_proxy 127.0.0.1:81 {
+reverse_proxy 127.0.0.1:PORT {
 	header_up X-Forwarded-For {remote}
 }
