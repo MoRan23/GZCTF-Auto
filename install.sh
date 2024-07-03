@@ -79,9 +79,9 @@ set_smtp(){
 
 set_port(){
     while true; do
-        read -p "请设置GZCTF的端口（默认为80）: " gz_port
+        read -p "请设置GZCTF的端口（默认为81）: " gz_port
         if [ -z "$gz_port" ]; then
-            gz_port=80
+            gz_port=81
         fi
         case $gz_port in
             ''|*[!0-9]*) echo "端口号必须为数字，请重新输入！" ;;
@@ -315,7 +315,7 @@ done
 
 if [ "$net" -eq 2 ]; then
     while true; do
-        echo "请选择是否解析了域名："
+        echo "请选择是否解析了域名(国内服务器需备案！！！)："
         echo "1) 是"
         echo "2) 否"
         read -p "请输入您的选择: " select
