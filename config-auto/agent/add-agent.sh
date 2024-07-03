@@ -2,7 +2,7 @@
 
 if [ "$#" -ne 2 ]; then
     echo "--------------------------------------------------------------------------------------"
-    echo "使用方法: bash add-agent.sh <ip> <hostname>"
+    echo "使用方法: bash add-agent.sh [ip] [hostname]"
     echo "其中 ip 为新加机器的ip地址,  hostname 为新加机器的主机名, 都是必填项"
     echo "主机名必须符合标准：长度在1到255之间，只能包含字母、数字、连字符。且不能与已有主机名重复！！！"
     echo "例如: bash add-agent.sh 10.10.10.10 k3s-agent-example"
