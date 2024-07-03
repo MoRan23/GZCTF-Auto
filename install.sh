@@ -88,7 +88,7 @@ set_port(){
                 if [ "$gz_port" -lt 1 ] || [ "$gz_port" -gt 65535 ]; then
                     echo "端口号必须在 1-65535 之间，请重新输入！"
                 else
-                    netstat -tuln | grep ":$gz_port\b" > /dev/null
+                    ss -tuln | grep ":$gz_port\b" > /dev/null
                     if [ $? -eq 0 ]; then
                         echo "端口 $gz_port 已被占用, 请重新输入！"
                     else
