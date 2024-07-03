@@ -111,6 +111,37 @@ echo "正在执行初始化，请稍后..."
 start
 echo "初始化成功！请继续配置"
 
+echo "请选择部署网络环境："
+echo "1) 内网"
+echo "2) 公网"
+while true; do
+    read -p "请输入您的选择: " net
+
+    case $net in
+        1)
+            echo "选择内网部署..."
+            private_ip=$(hostname -I | awk '{print $1}')
+            sed -i "s|DOMAIN|$private_ip|g" ./config-auto/gz/appsettings.json
+            break
+            ;;
+        2)
+            echo "选择公网部署..."
+            IP_ADDR=$(hostname -I | awk '{print $1}')
+            if [[ $IP_ADDR =~ ^10\. ]] || [[ $IP_ADDR =~ ^192\.168\. ]] || [[ $IP_ADDR =~ ^172\.1[6-9]\. ]] || [[ $IP_ADDR =~ ^172\.2[0-9]\. ]] || [[ $IP_ADDR =~ ^172\.3[0-1]\. ]]; then
+                echo "主机在 VPC 网络中..."
+                VPC=1
+            else
+                echo "主机在 经典 网络中..."
+                VPC=0
+            fi
+            break
+            ;;
+        *)
+            echo "无效的选择，请重新输入！"
+            ;;
+    esac
+done
+
 echo "请选择部署方式："
 echo "1) docker部署（适用于小型比赛单机部署）"
 echo "2) docker+k3s部署（适用于大型比赛单机或多机部署）"
@@ -162,14 +193,6 @@ while true; do
                         sed -i "s|#AGENT_HOSTS|echo \"$hostIP k3s-agent-$i\" >> /etc/hosts\n#AGENT_HOSTS|g" config-auto/agent/agent-temp.sh
                         echo "$hostIP k3s-agent-$i" >> /etc/hosts
                     done
-                    IP_ADDR=$(hostname -I | awk '{print $1}')
-                    if [[ $IP_ADDR =~ ^10\. ]] || [[ $IP_ADDR =~ ^192\.168\. ]] || [[ $IP_ADDR =~ ^172\.1[6-9]\. ]] || [[ $IP_ADDR =~ ^172\.2[0-9]\. ]] || [[ $IP_ADDR =~ ^172\.3[0-1]\. ]]; then
-                        echo "主机在 VPC/内网 网络中..."
-                        VPC=1
-                    else
-                        echo "主机在 经典 网络中..."
-                        VPC=0
-                    fi
                     break
                 fi
             done
@@ -177,29 +200,6 @@ while true; do
             ;;
         *)
             echo "无效的选择，请重新输入："
-            ;;
-    esac
-done
-
-echo "请选择部署网络环境："
-echo "1) 内网"
-echo "2) 公网"
-while true; do
-    read -p "请输入您的选择: " net
-
-    case $net in
-        1)
-            echo "选择内网部署..."
-            private_ip=$(hostname -I | awk '{print $1}')
-            sed -i "s|DOMAIN|$private_ip|g" ./config-auto/gz/appsettings.json
-            break
-            ;;
-        2)
-            echo "选择公网部署..."
-            break
-            ;;
-        *)
-            echo "无效的选择，请重新输入！"
             ;;
     esac
 done
