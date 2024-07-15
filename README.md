@@ -16,7 +16,7 @@ wget -O install.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/Mo
 ## 更新计划
 |功能|状态|
 |--|--|
-|qq机器人|被go-cqhttp折磨了，暂时不做了|
+|qq机器人|已建库：[GZCTF_BOT_QQ](https://github.com/MoRan23/GZCTF_BOT_QQ "GZCTF_BOT_QQ")|
 |AWD(P)平台|暂无排期，预计发布在新项目|
 ## 赞助鸣谢
 ### DKDUN
