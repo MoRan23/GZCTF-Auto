@@ -1,7 +1,7 @@
 # GZCTF-Auto
   
 ## GZCTF
-项目地址：https://github.com/GZTimeWalker/GZCTF
+项目地址：https://github.com/GZTimeWalker/GZCTF  
 官方文档：https://docs.ctf.gzti.me/zh
 
 ## 项目介绍&使用方法
