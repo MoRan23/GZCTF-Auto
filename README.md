@@ -7,6 +7,9 @@
 ## 项目介绍&使用方法
 GZCTF 一键部署  
 现已支持单 `docker` 以及 `docker+k3s` 部署  
+机器人基础功能已经开发完毕！期待使用！  
+[GZCTF-BOT-QQ](https://github.com/MoRan23/GZCTF_BOT_QQ "GZCTF-BOT-QQ")  
+未来将会将部署集成至该脚本  
 更多功能持续更新......  
 测试环境：ubuntu 22.04 全新机  
 使用方式：  
