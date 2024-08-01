@@ -1,5 +1,5 @@
 #!/bin/bash
-
+stty erase '^H'
 check(){
     if [ $(id -u) != "0" ]; then
         echo "请使用root用户执行此脚本！"
