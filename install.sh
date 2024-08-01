@@ -367,6 +367,7 @@ if [ "$net" -eq 2 ]; then
                     sed -i "s|DOMAIN|$domain|g" ./config-auto/caddy/Caddyfile
                     sed -i "s|SERVER|$public_ip|g" ./config-auto/agent/agent-temp.sh
                     sed -i "s|PORT|81|g" ./config-auto/caddy/Caddyfile
+                    sed -i "s|PORT|81|g" ./config-auto/gz/docker-compose.yaml
                     break
                 else
                     echo "域名 $domain 解析的 IP ($domain_ip) 不是本机的公网 IP ($public_ip)"
