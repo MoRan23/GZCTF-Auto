@@ -489,20 +489,26 @@ if [ "$net" -eq 2 ]; then
             green_echo "caddy 已安装，跳过安装."
         fi
 
-        mkdir caddy
-        mv ./config-auto/caddy/Caddyfile ./caddy/
-        
-        cd caddy
-        nohup caddy run > caddy.log 2>&1 &
-        PID_TO_CHECK=$!
-
-        if ps -p $PID_TO_CHECK > /dev/null
+        if ! command -v caddy &> /dev/null
         then
-            green_echo "caddy 进程在运行中."
+            red_echo "caddy 安装失败."
         else
-            red_echo "caddy 启动失败！"
+            green_echo "caddy 安装成功."
+            mkdir caddy
+            mv ./config-auto/caddy/Caddyfile ./caddy/
+            
+            cd caddy
+            nohup caddy run > caddy.log 2>&1 &
+            PID_TO_CHECK=$!
+
+            if ps -p $PID_TO_CHECK > /dev/null
+            then
+                green_echo "caddy 进程在运行中."
+            else
+                red_echo "caddy 启动失败！"
+            fi
+            cd ../
         fi
-        cd ../
     else
         echo "未解析域名, 跳过caddy配置..."
     fi
@@ -518,6 +524,7 @@ if [ $? -eq 0 ]; then
     green_echo "GZCTF 启动成功."
 else
     red_echo "GZCTF 启动失败."
+    exit 1
 fi
 
 green_echo "============"
