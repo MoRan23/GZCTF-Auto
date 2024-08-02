@@ -169,8 +169,8 @@ while true; do
 done
 
 echo "正在执行初始化，请稍后..."
-check
 start
+check
 echo "初始化成功！请继续配置"
 
 echo "请选择部署网络环境："
