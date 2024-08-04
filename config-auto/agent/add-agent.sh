@@ -1,5 +1,6 @@
 #!/bin/bash
 
+stty erase '^H'
 if [ "$#" -ne 2 ]; then
     echo "--------------------------------------------------------------------------------------"
     echo "使用方法: bash add-agent.sh [ip] [hostname]"

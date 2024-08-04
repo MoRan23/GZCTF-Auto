@@ -4,7 +4,7 @@ hostnamectl set-hostname NAME
 echo "MASTER_IP k3s-master" >> /etc/hosts
 #AGENT_HOSTS
 
-source_add="https://hub.hk1.dkdun.com/"
+source_add="https://hub.huhstsec.top/"
 
 login=0
 
@@ -59,7 +59,7 @@ else
     echo "跳过登录..."
 fi
 
-curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
+curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
 wget -O kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
 mkdir -p /etc/rancher/k3s/
 mv kubelet.config /etc/rancher/k3s/
