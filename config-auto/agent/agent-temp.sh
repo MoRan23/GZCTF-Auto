@@ -59,6 +59,15 @@ else
     echo "跳过登录..."
 fi
 
+public_ip=$(curl -s https://api.ipify.org)
+IP_ADDR=$(hostname -I | awk '{print $1}')
+if [[ $IP_ADDR =~ ^10\. ]] || [[ $IP_ADDR =~ ^192\.168\. ]] || [[ $IP_ADDR =~ ^172\.1[6-9]\. ]] || [[ $IP_ADDR =~ ^172\.2[0-9]\. ]] || [[ $IP_ADDR =~ ^172\.3[0-1]\. ]]; then
+    echo "主机在 VPC 网络中..."
+    curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -s - --node-external-ip=$public_ip
+else
+    echo "主机在 经典 网络中..."
+    curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
+fi
 curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
 wget -O kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
 mkdir -p /etc/rancher/k3s/
