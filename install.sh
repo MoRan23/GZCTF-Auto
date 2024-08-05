@@ -226,7 +226,7 @@ while true; do
             sed -i "s|#K3S|,\"KubernetesConfig\": {\"Namespace\": \"gzctf-challenges\",\"ConfigPath\": \"kube-config.yaml\",\"AllowCIDR\": [\"10.0.0.0/8\"],\"DNS\": [\"8.8.8.8\",\"223.5.5.5\"]}|g" ./config-auto/gz/appsettings.json
             sed -i "s|# - \"./kube-config.yaml:/app/kube-config.yaml:ro\"|- \"./kube-config.yaml:/app/kube-config.yaml:ro\"|g" ./config-auto/gz/docker-compose.yaml
             while true; do
-                read -p "请输入k3s节点机器数量（本机除外）： " hostNum
+                read -p "请输入k3s节点机器数量（本机除外, 单机部署填 0 ）： " hostNum
                 if [ -z "$hostNum" ]; then
                     echo "输入为空，请重新输入。"
                 elif ! echo "$hostNum" | grep -qE '^[0-9]+$'; then
@@ -237,7 +237,7 @@ while true; do
                     for i in $(seq 1 $hostNum); do
                         while true; do
                             read -p "请输入k3s节点 $i 的ip地址（将会影响自动连接脚本）： " hostIP
-                            echo "请确认k3s节点 1 的ip地址（必须无错误，否则会出现连接不上的情况）：$hostIP "
+                            echo "请确认k3s节点 $i 的ip地址（必须无错误，否则会出现连接不上的情况）：$hostIP "
                             echo "1) 确认"
                             echo "2) 重新输入"
                             read -p "是否确认？: " confirm
@@ -536,7 +536,11 @@ echo "==========================================================================
 
 if [ "$setup" -eq 2 ]; then
     echo "---------------------------------------------------------------------------------------------------------------"
-    echo "请将 k3s-agent 文件夹中的脚本拷贝到相应的其他节点机器上，并执行 k3s-agent-*.sh"
+    if [ "$hostNum" -eq 0 ]; then
+        green_echo "当前为单机部署, 无需执行节点机器加入脚本"
+    else
+        green_echo "请将 k3s-agent 文件夹中的脚本拷贝到相应的其他节点机器上，并执行 k3s-agent-*.sh"
+    fi
     echo "如有新加机器, 请使用 k3s-agent 文件夹中的 add-agent.sh 脚本添加, 并且请手动添加 <ip> <hostname> 到本机 /etc/hosts 中"
     echo "使用方法: bash add-agent.sh [ip] [hostname]"
     echo "其中 ip 为新加机器的ip地址,  hostname 为新加机器的主机名, 都是必填项"
@@ -546,8 +550,12 @@ if [ "$setup" -eq 2 ]; then
     echo "---------------------------------------------------------------------------------------------------------------"
 fi
 
-echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
-echo "Caddy 相关文件已经保存在当前目录下的 caddy 文件夹中"
+green_echo "GZCTF 相关文件已经保存在当前目录下的 GZCTF 文件夹中"
+if [ "$net" -eq 2 ]; then
+    if [ "$select" -eq 1 ]; then
+        green_echo "Caddy 相关文件已经保存在当前目录下的 caddy 文件夹中"
+    fi
+fi
 
 if [ "$net" -eq 2 ]; then
     if [ "$select" -eq 1 ]; then
