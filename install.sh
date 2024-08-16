@@ -280,12 +280,12 @@ while true; do
             read -p "输入镜像源（默认内置源）: " source_add
 
             if [ -z "$source_add" ]; then
-                source_add="https://hub.hk1.dkdun.com/"
+                source_add="https://hub.docker-alhk.dkdun.com/"
             fi
             echo "使用的镜像源是: $source_add"
             sed -i "s|\[\"[^\"]*\"\]|\[\"$source_add\"\]|g" ./config-auto/docker/daemon.json
-            sed -i "s|https://hub.hk1.dkdun.com/|$source_add|g" ./config-auto/agent/agent-temp.sh
-            sed -i "s|https://hub.hk1.dkdun.com/|$source_add|g" ./config-auto/k3s/registries.yaml
+            sed -i "s|https://hub.docker-alhk.dkdun.com/|$source_add|g" ./config-auto/agent/agent-temp.sh
+            sed -i "s|https://hub.docker-alhk.dkdun.com/|$source_add|g" ./config-auto/k3s/registries.yaml
             break
             ;;
         2)
