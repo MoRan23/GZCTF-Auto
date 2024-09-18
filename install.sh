@@ -38,7 +38,7 @@ start(){
     sudo apt-get -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install apt-transport-https ca-certificates curl software-properties-common dnsutils debian-keyring debian-archive-keyring
-    mkdir config-auto config-auto/agent config-auto/docker config-auto/gz config-auto/k3s config-auto/caddy
+    mkdir -p config-auto config-auto/agent config-auto/docker config-auto/gz config-auto/k3s config-auto/caddy
     wget -O config-auto/agent/agent-temp.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/agent/agent-temp.sh
     wget -O config-auto/agent/add-agent.sh https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/agent/add-agent.sh
     wget -O config-auto/docker/daemon.json https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/docker/daemon.json
@@ -412,7 +412,7 @@ mv ./config-auto/docker/daemon.json /etc/docker/
 sudo systemctl daemon-reload && sudo systemctl restart docker
 
 if [ "$setup" -eq 1 ]; then
-    mkdir GZCTF
+    mkdir -p GZCTF
     mv ./config-auto/gz/appsettings.json ./GZCTF/
     mv ./config-auto/gz/docker-compose.yaml ./GZCTF/
 else
@@ -454,7 +454,7 @@ else
     mv ./config-auto/k3s/kubelet.config /etc/rancher/k3s/
     mv ./config-auto/k3s/registries.yaml /etc/rancher/k3s/
     sudo systemctl daemon-reload && sudo systemctl restart k3s
-    mkdir GZCTF
+    mkdir -p GZCTF
     sudo cat /etc/rancher/k3s/k3s.yaml > ./GZCTF/kube-config.yaml
     if [ "$net" -eq 2 ]; then
         sed -i "s|127.0.0.1|$public_ip|g" ./GZCTF/kube-config.yaml
@@ -467,7 +467,7 @@ else
     fi
     mv ./config-auto/gz/appsettings.json ./GZCTF/
     mv ./config-auto/gz/docker-compose.yaml ./GZCTF/
-    mkdir k3s-agent
+    mkdir -p k3s-agent
     cp ./config-auto/agent/agent-temp.sh k3s-agent/agent-temp
     mv ./config-auto/agent/add-agent.sh k3s-agent/add-agent.sh
     for i in $(seq 1 $hostNum); do
@@ -495,7 +495,7 @@ if [ "$net" -eq 2 ]; then
             red_echo "caddy 安装失败."
         else
             green_echo "caddy 安装成功."
-            mkdir caddy
+            mkdir -p caddy
             mv ./config-auto/caddy/Caddyfile ./caddy/
             
             cd caddy
