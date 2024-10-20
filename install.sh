@@ -418,7 +418,7 @@ if [ "$setup" -eq 1 ]; then
 else
     if [ "$net" -eq 2 ]; then
         if [ "$VPC" -eq 1 ]; then
-            curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --node-external-ip="$public_ip" --flannel-backend=wireguard-native --flannel-external-ip
+            curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --node-external-ip="$public_ip" --flannel-backend=wireguard-native --flannel-external-ip --disable=traefik --kube-apiserver-arg=service-node-port-range=20000-50000 --kubelet-arg=config=/etc/rancher/k3s/kubelet.config
             if ! command -v kubectl &> /dev/null
             then
                 red_echo "k3s 安装失败."
@@ -428,7 +428,7 @@ else
             fi
             sed -i "s|sh -|sh -s - --node-external-ip=PUBLIC_IP|g" config-auto/agent/agent-temp.sh
         else
-            curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
+            curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --disable=traefik --kube-apiserver-arg=service-node-port-range=20000-50000 --kubelet-arg=config=/etc/rancher/k3s/kubelet.config
             if ! command -v kubectl &> /dev/null
             then
                 red_echo "k3s 安装失败."
@@ -438,7 +438,7 @@ else
             fi
         fi
     else
-        curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -
+        curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--kube-controller-manager-arg=node-cidr-mask-size=16" INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn sh -s - --disable=traefik --kube-apiserver-arg=service-node-port-range=20000-50000 --kubelet-arg=config=/etc/rancher/k3s/kubelet.config
         if ! command -v kubectl &> /dev/null
         then
             red_echo "k3s 安装失败."
@@ -449,8 +449,6 @@ else
     fi
     token=$(sudo cat /var/lib/rancher/k3s/server/token)
     sed -i "s|mynodetoken|$token|g" ./config-auto/agent/agent-temp.sh
-    sed -i '${/^$/d}' /etc/systemd/system/k3s.service
-    echo -e "        '--disable=traefik' \\\\\\n        '--kube-apiserver-arg=service-node-port-range=20000-50000' \\\\\\n        '--kubelet-arg=config=/etc/rancher/k3s/kubelet.config' \\\\\\n" >> /etc/systemd/system/k3s.service
     mv ./config-auto/k3s/kubelet.config /etc/rancher/k3s/
     mv ./config-auto/k3s/registries.yaml /etc/rancher/k3s/
     sudo systemctl daemon-reload && sudo systemctl restart k3s
