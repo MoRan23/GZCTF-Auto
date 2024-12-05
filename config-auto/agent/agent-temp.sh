@@ -68,12 +68,12 @@ else
     echo "主机在 经典 网络中..."
     curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
 fi
-curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_EXEC="--docker" INSTALL_K3S_MIRROR=cn K3S_URL=https://SERVER:6443 K3S_TOKEN=mynodetoken sh -
+
 wget -O kubelet.config https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/kubelet.config
 mkdir -p /etc/rancher/k3s/
 mv kubelet.config /etc/rancher/k3s/
 wget -O registries.yaml https://cdn.moran233.xyz/https://raw.githubusercontent.com/MoRan23/GZCTF-Auto/main/config-auto/k3s/registries.yaml
-sed -i "s|https://docker.huhstsec.top|$source_add|g" registries.yaml
+sed -i "s|https://hub.huhstsec.top|$source_add|g" registries.yaml
 mv registries.yaml /etc/rancher/k3s/
 sed -i '${/^$/d}' /etc/systemd/system/k3s-agent.service
 echo -e "        '--kubelet-arg=config=/etc/rancher/k3s/kubelet.config' \\\\\\n" >> /etc/systemd/system/k3s-agent.service
